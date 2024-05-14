@@ -2,3 +2,4 @@ clear_up_space.txt
 backup/*
 roles/files/*
 inventory.yml
+playbook.yml
