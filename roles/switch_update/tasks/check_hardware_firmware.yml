@@ -1,0 +1,59 @@
+- name: Gather device version information
+  ios_command:
+    commands:
+      - show version
+  register: version_info
+
+- name: Extract current firmware version
+  set_fact:
+    current_firmware: "{{ version_info.stdout[0] | regex_search('flash:\/?(.+?)\\.bin', '\\1') | first }}"
+
+- name: Determine device model
+  set_fact:
+    device_model: "{{ version_info.stdout[0] | regex_search('Model number\\s*:\\s*(\\S+)', '\\1') | first }}"
+
+# - name: Test firmware version mapping
+#   debug:
+#     msg: "Firmware for model {{ device_model }} is {{ firmware_versions[device_model] }}"
+#   when: device_model in firmware_versions
+
+# - name: Determine if firmware update is needed
+#   block:
+#     - name: Check if model exists in firmware versions
+#       fail:
+#         msg: "Model {{ device_model }} does not have an associated firmware version defined."
+#       when: device_model not in firmware_versions
+
+#     - name: Set desired firmware from variables
+#       set_fact:
+#         update_needed: "{{ current_firmware != firmware_versions[device_model] }}"
+#   when: device_model in firmware_versions
+
+# - name: Backup config and prepare for update if needed
+#   include_tasks: backup.yml
+#   when: update_needed | bool
+
+- name: Determine if firmware update is needed
+  block:
+    - name: Check if model exists in firmware versions
+      fail:
+        msg: "Model {{ device_model }} does not have an associated firmware version defined."
+      when: device_model not in firmware_versions
+
+    - name: Debug current and desired firmware
+      debug:
+        msg: "Current firmware: {{ current_firmware }}, Desired firmware: {{ firmware_versions[device_model] }}"
+
+    - name: Set desired firmware from variables
+      set_fact:
+        update_needed: "{{ current_firmware != firmware_versions[device_model] }}"
+
+  when: device_model in firmware_versions
+
+- name: Debug update needed
+  debug:
+    msg: "Update needed status: {{ update_needed }}"
+
+- name: Backup config and prepare for update if needed
+  include_tasks: backup.yml
+  when: update_needed

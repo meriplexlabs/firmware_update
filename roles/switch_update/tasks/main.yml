@@ -1,0 +1,11 @@
+- name: Set current date
+  set_fact:
+    current_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+
+- name: Create backup directory with today's date
+  ansible.builtin.file:
+    path: "backup/{{ current_date }}"
+    state: directory
+
+- name: Check hardware and firmware
+  include_tasks: check_hardware_firmware.yml

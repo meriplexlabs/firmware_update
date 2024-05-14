@@ -1,0 +1,26 @@
+- name: Check free space on device
+  ios_command:
+    commands:
+      - show flash
+  register: disk_space
+
+- name: Calculate and debug free space in MB
+  set_fact:
+    free_space_mb: "{{ (disk_space.stdout[0] | regex_search('([0-9]+) bytes free', '\\1') | first | float) / 1024 }}"
+
+- name: Mark hosts with enough space
+  set_fact:
+    sufficient_space: true
+  when: "(free_space_mb | float) > (min_free_space_mb | float)"
+
+- name: Log hosts with insufficient disk space
+  lineinfile:
+    path: clear_up_space.txt
+    line: "{{ inventory_hostname }}"
+    create: yes
+  when: "(free_space_mb | float) <= (min_free_space_mb | float)"
+
+
+# - name: Upload Firmware
+#   include_tasks: upload_firmware.yml
+#   when: sufficient_space | default(false) | bool

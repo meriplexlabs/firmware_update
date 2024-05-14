@@ -1,0 +1,6 @@
+firmware_versions:
+  "WS-C3750-48TS-S": "c3750-ipservicesk9-mz.122-55.SE9"
+  "WS-C2960G-24TC-L": "c2960-lanbasek9-mz.150-2.SE7"
+  "WS-C2960S-48TS-L": "c2960s-universalk9-mz.150-2.SE3"
+
+min_free_space_mb: 100  # Minimum free space in MB

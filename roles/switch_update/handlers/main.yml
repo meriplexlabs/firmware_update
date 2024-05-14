@@ -1,0 +1,6 @@
+- name: reload_switch
+  ios_command:
+    commands:
+      - "reload in 10"
+  async: 90
+  poll: 0

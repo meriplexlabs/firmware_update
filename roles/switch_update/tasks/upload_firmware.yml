@@ -1,0 +1,19 @@
+- name: Upload firmware
+  ios_file:
+    src: "{{ firmware_versions[item.model] }}"
+    dest: "flash:/{{ firmware_versions[item.model] }}"
+    scp: yes
+  with_items: "{{ ansible_play_hosts }}"
+
+- name: Verify upload
+  ios_command:
+    commands:
+      - "verify /md5 flash:/{{ firmware_versions[item.model] }}"
+  register: md5_output
+  failed_when: "md5_output.stdout[0] does not contain expected_md5_hash"
+
+- name: Set boot variable and reload
+  ios_config:
+    lines:
+      - "boot system flash:/{{ firmware_versions[item.model] }}"
+  notify: reload_switch

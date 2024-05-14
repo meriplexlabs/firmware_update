@@ -1,0 +1,4 @@
+- hosts: cisco_switches
+  gather_facts: no
+  roles:
+    - switch_update
